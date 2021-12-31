@@ -1,5 +1,5 @@
 #!/bin/bash
-# 初始化脚本，拉取数据，创建执行脚本
+# 初始化脚本，创建部署脚本
 
 echoFun(){
     str=$1
@@ -31,9 +31,9 @@ go env
 
 echoFun "current path: $(pwd)" title
 echoFun "download produce.sh" title
-src='https://github.com/ZYallers/rpcx-framework/raw/master/script/produce.sh'
+src='https://raw.githubusercontent.com/ZYallers/rpcx-framework/master/script/produce.sh'
 des='./bin/produce.sh'
-curl -sS --connect-timeout 3 --max-time 10 -o ${des} ${src}
+curl -o ${des} ${src}
 if [[ ! -f "$des" ]];then
     echoFun "download produce.sh($(pwd)/$des) failed" err
     exit 1
