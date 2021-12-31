@@ -1,0 +1,37 @@
+{
+  "global": {
+    "modeKey": "xxx_env",
+    "server": {
+      "development": {
+        "hostname": "xxx_pre",
+        "ip": "127.0.0.1"
+      }
+    }
+  },
+  "service": {
+    "version": "1.0.0",
+    "versionKey": "app_version",
+    "name": "rpcx-demo",
+    "addr": "0.0.0.0:9999",
+    "logDir": "/apps/logs/go/rpcx-demo",
+    "errorRobotToken": "",
+    "gracefulRobotToken": "",
+    "etcd": {
+      "development": {
+        "basePath": "/rpcx/development",
+        "addr": "127.0.0.1:2379",
+        "updateInterval": 30
+      },
+      "gray": {
+        "basePath": "/rpcx/gray",
+        "addr": "127.0.0.1:2379",
+        "updateInterval": 30
+      },
+      "production": {
+        "basePath": "/rpcx/production",
+        "addr": "127.0.0.1:2379",
+        "updateInterval": 30
+      }
+    }
+  }
+}
