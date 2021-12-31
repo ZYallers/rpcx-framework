@@ -1,5 +1,5 @@
 #!/bin/bash
-# 初始化脚本，创建部署脚本
+# Initialize the script, pull the data, and generate the compilation and deployment script
 
 echoFun(){
     str=$1
