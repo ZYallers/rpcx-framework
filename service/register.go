@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"github.com/syyongx/php2go"
 	"github.com/ZYallers/rpcx-framework/define"
 	"github.com/ZYallers/rpcx-framework/env"
+	"github.com/syyongx/php2go"
 	"reflect"
 )
 
@@ -14,11 +14,10 @@ func RegisterFuncName(rs *RPCXService, services define.Restful) error {
 	if err := registerHealthFunc(rs); err != nil {
 		return err
 	}
-	if len(services) <= 0 {
-		return env.ErrRegisterServiceEmpty
-	}
-	if err := registerServiceMethod(rs, &services); err != nil {
-		return err
+	if len(services) > 0 {
+		if err := registerServiceMethod(rs, &services); err != nil {
+			return err
+		}
 	}
 	return nil
 }
