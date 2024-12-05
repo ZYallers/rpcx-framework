@@ -123,10 +123,15 @@ buildFun(){
 
     echoFun "build runner:" title
     tmpName="${serviceName}_$(date +'%Y%m%d%H%M%S')"
-    if [[ "$env" == "dev" ]];then
-        echoFun 'build in develop environment' tip
+    if [[ "$env" == "debug" ]];then
+        echoFun '>>>>>>>>>> build for debug mode <<<<<<<<<<' tip
+        # 配合 delve 使用, @see http://wiki.sys.hxsapp.net/pages/viewpage.action?pageId=21349181
+        CGO_ENABLED=0 go build -v -installsuffix cgo -gcflags 'all=-N -l' -i -o ./bin/${tmpName} -tags=jsoniter ./main.go
+    elif [[ "$env" == "dev" ]];then
+        echoFun '>>>>>>>>>> build for development mode <<<<<<<<<<' tip
         CGO_ENABLED=0 go build -v -installsuffix cgo -ldflags '-w' -i -o ./bin/${tmpName} -tags=jsoniter ./main.go
     else
+        echoFun '>>>>>>>>>> build for production mode <<<<<<<<<<' tip
         # Build compilation parameter reference:
         # Dependency free compilation：https://blog.csdn.net/weixin_42506905/article/details/93135684
         # Detailed explanation of build parameters：https://blog.csdn.net/zl1zl2zl3/article/details/83374131
@@ -149,7 +154,8 @@ buildFun(){
 }
 
 sendMsg(){
-    envVar="$(echo $hxsenv)"
+    modeKey=$(getJsonValue "modeKey")
+    envVar="$(echo $$modeKey)"
     if [[ "$envVar" == "" ]];then
         envVar="development"
     fi
