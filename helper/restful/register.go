@@ -1,21 +1,22 @@
-package service
+package restful
 
 import (
 	"fmt"
-	"github.com/ZYallers/rpcx-framework/define"
 	"reflect"
 	"sort"
 	"strconv"
 	"sync"
+
+	"github.com/ZYallers/rpcx-framework/types"
 )
 
 var (
 	lock     sync.Mutex
-	services []define.IService
+	services []types.IService
 )
 
-func GetServices() define.Restful {
-	res := define.Restful{}
+func GetServices() types.Restful {
+	res := types.Restful{}
 	for _, service := range services {
 		serviceValueOf := reflect.ValueOf(service)
 		serviceName := serviceValueOf.Elem().Type().Name()
@@ -40,7 +41,7 @@ func GetServices() define.Restful {
 				panic(fmt.Errorf("restHandler.Method does not exist: %s.%s\n", serviceName, methodName))
 			}
 
-			resHandler := define.RestHandler{
+			resHandler := types.RestHandler{
 				Path:    path,
 				Service: service,
 				Method:  methodName,
@@ -68,7 +69,7 @@ func GetServices() define.Restful {
 	return res
 }
 
-func Register(s ...define.IService) {
+func Register(s ...types.IService) {
 	lock.Lock()
 	defer lock.Unlock()
 	services = append(services, s...)

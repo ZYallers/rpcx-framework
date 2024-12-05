@@ -23,16 +23,10 @@ echoFun(){
     esac
 }
 
-echoFun "go version" title
-go version
-
-echoFun "go env" title
-go env
-
 echoFun "current path: $(pwd)" title
 echoFun "download produce.sh" title
-src='https://raw.githubusercontent.com/ZYallers/rpcx-framework/master/script/produce.sh'
-des='./bin/produce.sh'
+src='https://github.com/ZYallers/rpcx-framework/raw/master/script/produce.sh'
+des=`dirname $0`"/produce.sh"
 curl -o ${des} ${src}
 if [[ ! -f "$des" ]];then
     echoFun "download produce.sh($(pwd)/$des) failed" err
@@ -40,5 +34,5 @@ if [[ ! -f "$des" ]];then
 fi
 chmod u+x ${des}
 echoFun "download produce.sh($(pwd)/$des) finished" ok
-./bin/produce.sh help
+$des help
 

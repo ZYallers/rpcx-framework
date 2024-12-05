@@ -3,11 +3,11 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"github.com/ZYallers/rpcx-framework/helper"
-	"github.com/ZYallers/zgin/libraries/json"
-	"github.com/ZYallers/zgin/libraries/tool"
 	"math/rand"
 	"time"
+
+	"github.com/ZYallers/golib/utils/curl"
+	"github.com/ZYallers/golib/utils/json"
 )
 
 type jsonRpc struct {
@@ -23,19 +23,19 @@ type jsonRpc struct {
 	}
 }
 
-func JsonRpc2(serviceName, serviceAddr, serviceMethod string, args map[string]interface{}, other ...interface{}) (interface{}, error) {
-	req := tool.NewRequest(fmt.Sprintf("http://%s", serviceAddr))
+func JsonRpc2(serviceName, serviceAddr, serviceMethod string, args map[string]interface{}, options ...interface{}) (interface{}, error) {
+	req := curl.NewRequest(fmt.Sprintf("http://%s", serviceAddr))
 	req.SetHeaders(map[string]string{"X-JSONRPC-2.0": "true"})
 	data := jsonRpc{
-		Id:      rand.Int(),
 		Jsonrpc: "2.0",
+		Id:      rand.Int(),
 		Method:  fmt.Sprintf("%s.%s", serviceName, serviceMethod),
 		Params:  args,
 	}
 	b, _ := json.Marshal(data)
 	req.SetBody(bytes.NewReader(b))
-	if len(other) > 0 {
-		req.SetTimeOut(other[0].(time.Duration))
+	if len(options) > 0 {
+		req.SetTimeOut(options[0].(time.Duration))
 	}
 	resp, err := req.Post()
 	if err != nil {
@@ -45,7 +45,7 @@ func JsonRpc2(serviceName, serviceAddr, serviceMethod string, args map[string]in
 		return nil, nil
 	}
 	var res jsonRpc
-	if err := json.Unmarshal(helper.String2Bytes(resp.Body), &res); err != nil {
+	if err := json.Unmarshal([]byte(resp.Body), &res); err != nil {
 		return nil, err
 	}
 	if res.Error.Message != "" {

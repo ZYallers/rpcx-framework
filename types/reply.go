@@ -1,17 +1,8 @@
-package define
+package types
 
 import (
-	"context"
 	"time"
 )
-
-type M map[string]interface{}
-
-type IService interface {
-	Construct(service interface{}, ctx context.Context, args map[string]interface{}, reply *interface{})
-	SignCheck() bool
-	LoginCheck(values ...string) bool
-}
 
 type ReplyService struct {
 	Name     string     `json:"name,omitempty"`

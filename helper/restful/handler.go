@@ -1,16 +1,17 @@
-package service
+package restful
 
 import (
 	"context"
-	"github.com/ZYallers/rpcx-framework/define"
-	"github.com/ZYallers/rpcx-framework/env"
-	"github.com/syyongx/php2go"
 	"reflect"
+
+	"github.com/ZYallers/rpcx-framework/errors"
+	"github.com/ZYallers/rpcx-framework/types"
+	"github.com/syyongx/php2go"
 )
 
 const stateActive = "state=active"
 
-func RegisterFuncName(rs *RPCXService, services define.Restful) error {
+func RegisterFuncName(rs *types.Rpc, services types.Restful) error {
 	if err := registerHealthFunc(rs); err != nil {
 		return err
 	}
@@ -22,7 +23,7 @@ func RegisterFuncName(rs *RPCXService, services define.Restful) error {
 	return nil
 }
 
-func registerHealthFunc(rs *RPCXService) error {
+func registerHealthFunc(rs *types.Rpc) error {
 	return rs.Server.RegisterFunctionName(rs.Name, "health", func(ctx context.Context,
 		args map[string]interface{}, reply *interface{}) error {
 		*reply = "ok"
@@ -30,7 +31,7 @@ func registerHealthFunc(rs *RPCXService) error {
 	}, stateActive)
 }
 
-func registerServiceMethod(rs *RPCXService, services *define.Restful) error {
+func registerServiceMethod(rs *types.Rpc, services *types.Restful) error {
 	for path, handlers := range *services {
 		if err := rs.Server.RegisterFunctionName(rs.Name, path, dispatchHandler(rs, handlers), stateActive); err != nil {
 			return err
@@ -39,25 +40,25 @@ func registerServiceMethod(rs *RPCXService, services *define.Restful) error {
 	return nil
 }
 
-func dispatchHandler(rs *RPCXService, handlers []define.RestHandler) func(ctx context.Context, args map[string]interface{}, reply *interface{}) error {
+func dispatchHandler(rs *types.Rpc, handlers []types.RestHandler) func(ctx context.Context, args map[string]interface{}, reply *interface{}) error {
 	return func(ctx context.Context, args map[string]interface{}, reply *interface{}) error {
 		argsVersion := rs.Version
 		if ver, ok := args[rs.VersionKey].(string); ok && ver != "" {
 			argsVersion = ver
 		}
 		if handler := versionCompare(&handlers, argsVersion); handler == nil {
-			return env.ErrVersionCompare
+			return errors.ErrVersionCompare
 		} else {
 			v := reflect.ValueOf(handler.Service)
 			ptr := reflect.New(v.Type().Elem())
 			ptr.Elem().Set(v.Elem())
-			sv := ptr.Interface().(define.IService)
+			sv := ptr.Interface().(types.IService)
 			sv.Construct(rs, ctx, args, reply)
 			if handler.Signed && !sv.SignCheck() {
-				return env.ErrSignature
+				return errors.ErrSignature
 			}
 			if handler.Logged && !sv.LoginCheck() {
-				return env.ErrNeedLogin
+				return errors.ErrNeedLogin
 			}
 			result := ptr.MethodByName(handler.Method).Call(nil)
 			if result[0].IsNil() {
@@ -68,7 +69,7 @@ func dispatchHandler(rs *RPCXService, handlers []define.RestHandler) func(ctx co
 	}
 }
 
-func versionCompare(handlers *[]define.RestHandler, version string) *define.RestHandler {
+func versionCompare(handlers *[]types.RestHandler, version string) *types.RestHandler {
 	for _, handler := range *handlers {
 		if handler.Version == "" || handler.Version == version {
 			return &handler

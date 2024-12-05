@@ -1,4 +1,4 @@
-package define
+package types
 
 type Restful map[string][]RestHandler
 type RestHandler struct {

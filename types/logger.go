@@ -1,21 +1,25 @@
-package service
+package types
 
 import (
 	"fmt"
-	"github.com/ZYallers/rpcx-framework/helper"
-	zap2 "github.com/ZYallers/rpcx-framework/util/zap"
-	"go.uber.org/zap"
 	"runtime/debug"
+
+	libLogger "github.com/ZYallers/golib/utils/logger"
+	"go.uber.org/zap"
 )
 
 type logger struct {
+	Sender
 	handler func() *zap.Logger
 }
 
-func NewLogger(name string) *logger {
-	return &logger{handler: func() *zap.Logger {
-		return zap2.Use(name)
-	}}
+func NewLogger(name string, sender Sender) *logger {
+	return &logger{
+		Sender: sender,
+		handler: func() *zap.Logger {
+			return libLogger.Use(name)
+		},
+	}
 }
 
 func (l *logger) Debug(v ...interface{}) {
@@ -40,49 +44,65 @@ func (l *logger) Infof(format string, v ...interface{}) {
 func (l *logger) Warn(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	l.handler().Warn(s)
-	helper.ContextMessage("Warn: "+s, string(debug.Stack()), false)
+	if l.Sender != nil {
+		l.Sender.Error("Warn: "+s, string(debug.Stack()), true)
+	}
 }
 
 func (l *logger) Warnf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	l.handler().Warn(s)
-	helper.ContextMessage("Warn: "+s, string(debug.Stack()), false)
+	if l.Sender != nil {
+		l.Sender.Error("Warn: "+s, string(debug.Stack()), true)
+	}
 }
 
 func (l *logger) Error(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	l.handler().Error(s)
-	helper.ContextMessage("Error: "+s, string(debug.Stack()), true)
+	if l.Sender != nil {
+		l.Sender.Error("Error: "+s, string(debug.Stack()), true)
+	}
 }
 
 func (l *logger) Errorf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	l.handler().Error(s)
-	helper.ContextMessage("Error: "+s, string(debug.Stack()), true)
+	if l.Sender != nil {
+		l.Sender.Error("Error: "+s, string(debug.Stack()), true)
+	}
 }
 
 func (l *logger) Fatal(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	l.handler().Fatal(s)
-	helper.ContextMessage("Fatal: "+s, string(debug.Stack()), true)
+	if l.Sender != nil {
+		l.Sender.Error("Fatal: "+s, string(debug.Stack()), true)
+	}
 }
 
 func (l *logger) Fatalf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	l.handler().Fatal(s)
-	helper.ContextMessage("Fatal: "+s, string(debug.Stack()), true)
+	if l.Sender != nil {
+		l.Sender.Error("Fatal: "+s, string(debug.Stack()), true)
+	}
 }
 
 func (l *logger) Panic(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	l.handler().Panic(s)
-	helper.ContextMessage("Panic: "+s, string(debug.Stack()), true)
+	if l.Sender != nil {
+		l.Sender.Error("Panic: "+s, string(debug.Stack()), true)
+	}
 }
 
 func (l *logger) Panicf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	l.handler().Panic(s)
-	helper.ContextMessage("Panic: "+s, string(debug.Stack()), true)
+	if l.Sender != nil {
+		l.Sender.Error("Panic: "+s, string(debug.Stack()), true)
+	}
 }
 
 func (l *logger) Handle(v ...interface{}) {
